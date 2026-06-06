@@ -4,9 +4,11 @@ interface FilterBarProps {
   sexo: SexoFilter
   edad: EdadFilter
   sort: SortOption
+  hasActiveFilters: boolean
   onSexoChange: (v: SexoFilter) => void
   onEdadChange: (v: EdadFilter) => void
   onSortChange: (v: SortOption) => void
+  onClear: () => void
 }
 
 const SEXO_OPTIONS: { value: SexoFilter; label: string }[] = [
@@ -33,7 +35,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'precio-desc', label: 'Mayor precio' },
 ]
 
-export function FilterBar({ sexo, edad, sort, onSexoChange, onEdadChange, onSortChange }: FilterBarProps) {
+export function FilterBar({ sexo, edad, sort, hasActiveFilters, onSexoChange, onEdadChange, onSortChange, onClear }: FilterBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
       {/* Sexo pills */}
@@ -53,7 +55,20 @@ export function FilterBar({ sexo, edad, sort, onSexoChange, onEdadChange, onSort
         ))}
       </div>
 
-      <div className="flex gap-2 flex-wrap sm:ml-auto">
+      <div className="flex gap-2 flex-wrap sm:ml-auto items-center">
+        {/* Limpiar filtros */}
+        {hasActiveFilters && (
+          <button
+            onClick={onClear}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-slate-500 border border-slate-200 bg-white hover:border-secondary/60 hover:text-secondary transition-all"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Limpiar filtros
+          </button>
+        )}
+
         {/* Edad select */}
         <select
           value={edad}

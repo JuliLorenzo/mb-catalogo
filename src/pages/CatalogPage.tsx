@@ -125,7 +125,7 @@ export function CatalogPage() {
         {!catalogLoading && empresa && (
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl px-5 py-4">
             <p className="text-sm text-slate-500">Catálogo personalizado para</p>
-            <h2 className="font-bold text-text text-lg">{empresa.nombre} 🎁</h2>
+            <h2 className="font-bold text-text text-lg">{empresa.nombre}</h2>
           </div>
         )}
 
@@ -137,9 +137,16 @@ export function CatalogPage() {
           sexo={sexoFilter}
           edad={edadFilter}
           sort={sortOption}
+          hasActiveFilters={!!search.trim() || sexoFilter !== 'todos' || edadFilter !== 'todos' || sortOption !== 'az'}
           onSexoChange={setSexoFilter}
           onEdadChange={setEdadFilter}
           onSortChange={setSortOption}
+          onClear={() => {
+            setSearch('')
+            setSexoFilter('todos')
+            setEdadFilter('todos')
+            setSortOption('az')
+          }}
         />
 
         {/* Count */}
