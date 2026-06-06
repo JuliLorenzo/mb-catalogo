@@ -1,0 +1,58 @@
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../lib/supabase'
+import { Empresa, Catalogo } from '../types'
+
+async function fetchEmpresaByToken(token: string): Promise<Empresa | null> {
+  const { data, error } = await supabase
+    .from('empresas')
+    .select('*')
+    .eq('token_acceso', token)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return null
+    throw error
+  }
+  return data
+}
+
+async function fetchCatalogoByEmpresa(empresaId: string): Promise<Catalogo | null> {
+  const { data, error } = await supabase
+    .from('catalogos')
+    .select('*')
+    .eq('empresa_id', empresaId)
+    .eq('activo', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return null
+    throw error
+  }
+  return data
+}
+
+export function useCatalog(token: string | undefined) {
+  const empresaQuery = useQuery({
+    queryKey: ['empresa', token],
+    queryFn: () => fetchEmpresaByToken(token!),
+    enabled: !!token,
+    retry: false,
+  })
+
+  const catalogoQuery = useQuery({
+    queryKey: ['catalogo', empresaQuery.data?.id],
+    queryFn: () => fetchCatalogoByEmpresa(empresaQuery.data!.id),
+    enabled: !!empresaQuery.data?.id,
+    retry: false,
+  })
+
+  return {
+    empresa: empresaQuery.data ?? null,
+    catalogo: catalogoQuery.data ?? null,
+    isLoading: empresaQuery.isLoading || (!!empresaQuery.data && catalogoQuery.isLoading),
+    isError: empresaQuery.isError || catalogoQuery.isError,
+    notFound: empresaQuery.isFetched && !empresaQuery.data,
+  }
+}
