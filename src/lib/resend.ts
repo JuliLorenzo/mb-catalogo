@@ -104,22 +104,25 @@ export async function sendOrderEmail(params: SendOrderEmailParams): Promise<void
     year: 'numeric',
   }).format(new Date())
 
-  const response = await fetch('https://api.resend.com/emails', {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
+      Authorization: `Bearer ${supabaseAnonKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'onboarding@resend.dev',
-      to: 'mundobarriletesj@gmail.com',
+      to: 'julilorenzo4467@gmail.com',
       subject: `Nuevo pedido — ${empresa.nombre} — ${fecha}`,
       html: buildEmailHtml(params),
     }),
   })
 
+  const result = await response.json()
+
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(`Error al enviar email: ${error.message || response.statusText}`)
+    throw new Error(result.error ?? `Error ${response.status}`)
   }
 }

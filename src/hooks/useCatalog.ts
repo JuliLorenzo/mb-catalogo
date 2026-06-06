@@ -7,12 +7,9 @@ async function fetchEmpresaByToken(token: string): Promise<Empresa | null> {
     .from('empresas')
     .select('*')
     .eq('token_acceso', token)
-    .single()
+    .maybeSingle()
 
-  if (error) {
-    if (error.code === 'PGRST116') return null
-    throw error
-  }
+  if (error) throw error
   return data
 }
 
@@ -24,12 +21,9 @@ async function fetchCatalogoByEmpresa(empresaId: string): Promise<Catalogo | nul
     .eq('activo', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (error) {
-    if (error.code === 'PGRST116') return null
-    throw error
-  }
+  if (error) throw error
   return data
 }
 
@@ -51,8 +45,8 @@ export function useCatalog(token: string | undefined) {
   return {
     empresa: empresaQuery.data ?? null,
     catalogo: catalogoQuery.data ?? null,
-    isLoading: empresaQuery.isLoading || (!!empresaQuery.data && catalogoQuery.isLoading),
+    isLoading: empresaQuery.isPending || (empresaQuery.data != null && catalogoQuery.isPending),
     isError: empresaQuery.isError || catalogoQuery.isError,
-    notFound: empresaQuery.isFetched && !empresaQuery.data,
+    notFound: empresaQuery.isSuccess && empresaQuery.data === null,
   }
 }
