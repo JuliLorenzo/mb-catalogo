@@ -6,6 +6,8 @@ interface ProductGridProps {
   mostrarPrecios: boolean
   getItemQuantity: (id: string) => number
   onProductClick: (producto: Producto) => void
+  onAdd: (producto: Producto) => void
+  onUpdateQuantity: (productoId: string, cantidad: number) => void
   isLoading: boolean
 }
 
@@ -27,6 +29,8 @@ export function ProductGrid({
   mostrarPrecios,
   getItemQuantity,
   onProductClick,
+  onAdd,
+  onUpdateQuantity,
   isLoading,
 }: ProductGridProps) {
   if (isLoading) {
@@ -60,6 +64,8 @@ export function ProductGrid({
           mostrarPrecios={mostrarPrecios}
           cantidad={getItemQuantity(producto.id)}
           onClick={() => onProductClick(producto)}
+          onAdd={onAdd}
+          onUpdateQuantity={onUpdateQuantity}
         />
       ))}
     </div>

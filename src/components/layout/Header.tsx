@@ -16,10 +16,10 @@ export function Header({ empresa: _empresa, totalItems, onOpenOrder }: HeaderPro
           <img
             src="/logo.jpeg"
             alt="Mundo Barrilete"
-            className="h-20 w-20 rounded-2xl object-cover flex-shrink-0 shadow-sm"
+            className="h-20 w-20 object-contain flex-shrink-0"
           />
           <div>
-            <h1 className="font-extrabold text-text text-2xl sm:text-3xl tracking-tight leading-tight">
+            <h1 className="text-zinc-800 text-3xl sm:text-4xl leading-tight" style={{ fontFamily: "'Oswald', sans-serif" }}>
               MUNDO BARRILETE
             </h1>
             <p className="text-primary font-semibold text-sm sm:text-base tracking-wide mt-0.5">
@@ -31,7 +31,7 @@ export function Header({ empresa: _empresa, totalItems, onOpenOrder }: HeaderPro
         {/* Botón pedido */}
         <button
           onClick={onOpenOrder}
-          className="relative flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold px-4 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg active:scale-95 flex-shrink-0"
+          className="relative flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold px-5 py-3 rounded-2xl transition-all shadow-md hover:shadow-lg active:scale-95 flex-shrink-0"
           aria-label="Ver mi pedido"
         >
           <span className="text-lg leading-none">🎁</span>

@@ -40,7 +40,7 @@ export function CatalogPage() {
   const [search, setSearch] = useState('')
   const [sexoFilter, setSexoFilter] = useState<SexoFilter>('todos')
   const [edadFilter, setEdadFilter] = useState<EdadFilter>('todos')
-  const [sortOption, setSortOption] = useState<SortOption>('az')
+  const [sortOption, setSortOption] = useState<SortOption>('precio-asc')
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [orderPanelOpen, setOrderPanelOpen] = useState(false)
   const [view, setView] = useState<View>('catalog')
@@ -59,15 +59,9 @@ export function CatalogPage() {
 
     result = result.filter((p) => matchesEdad(p, edadFilter))
 
-    result.sort((a, b) => {
-      switch (sortOption) {
-        case 'az': return a.nombre.localeCompare(b.nombre, 'es')
-        case 'za': return b.nombre.localeCompare(a.nombre, 'es')
-        case 'precio-asc': return a.precio - b.precio
-        case 'precio-desc': return b.precio - a.precio
-        default: return 0
-      }
-    })
+    result.sort((a, b) =>
+      sortOption === 'precio-asc' ? a.precio - b.precio : b.precio - a.precio
+    )
 
     return result
   }, [productos, search, sexoFilter, edadFilter, sortOption])
@@ -137,7 +131,7 @@ export function CatalogPage() {
           sexo={sexoFilter}
           edad={edadFilter}
           sort={sortOption}
-          hasActiveFilters={!!search.trim() || sexoFilter !== 'todos' || edadFilter !== 'todos' || sortOption !== 'az'}
+          hasActiveFilters={!!search.trim() || sexoFilter !== 'todos' || edadFilter !== 'todos'}
           onSexoChange={setSexoFilter}
           onEdadChange={setEdadFilter}
           onSortChange={setSortOption}
@@ -145,7 +139,7 @@ export function CatalogPage() {
             setSearch('')
             setSexoFilter('todos')
             setEdadFilter('todos')
-            setSortOption('az')
+            setSortOption('precio-asc')
           }}
         />
 
@@ -162,6 +156,8 @@ export function CatalogPage() {
           mostrarPrecios={empresa?.mostrar_precios ?? true}
           getItemQuantity={order.getItemQuantity}
           onProductClick={setSelectedProduct}
+          onAdd={(p) => order.addItem(p, 1)}
+          onUpdateQuantity={order.updateQuantity}
           isLoading={isLoading}
         />
       </main>

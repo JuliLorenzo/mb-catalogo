@@ -28,13 +28,6 @@ const EDAD_OPTIONS: { value: EdadFilter; label: string }[] = [
   { value: '12+', label: '+12 años' },
 ]
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'az', label: 'A–Z' },
-  { value: 'za', label: 'Z–A' },
-  { value: 'precio-asc', label: 'Menor precio' },
-  { value: 'precio-desc', label: 'Mayor precio' },
-]
-
 export function FilterBar({ sexo, edad, sort, hasActiveFilters, onSexoChange, onEdadChange, onSortChange, onClear }: FilterBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
@@ -46,7 +39,7 @@ export function FilterBar({ sexo, edad, sort, hasActiveFilters, onSexoChange, on
             onClick={() => onSexoChange(opt.value)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all border ${
               sexo === opt.value
-                ? 'bg-primary text-white border-primary shadow-sm'
+                ? 'bg-primary/15 text-primary border-primary/50 shadow-sm'
                 : 'bg-white text-slate-600 border-slate-200 hover:border-primary/50 hover:text-primary'
             }`}
           >
@@ -70,30 +63,37 @@ export function FilterBar({ sexo, edad, sort, hasActiveFilters, onSexoChange, on
         )}
 
         {/* Edad select */}
-        <select
-          value={edad}
-          onChange={(e) => onEdadChange(e.target.value as EdadFilter)}
-          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
-        >
-          {EDAD_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={edad}
+            onChange={(e) => onEdadChange(e.target.value as EdadFilter)}
+            className="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
+          >
+            {EDAD_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
 
-        {/* Orden select */}
-        <select
-          value={sort}
-          onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        {/* Orden por precio — desplegable */}
+        <div className="relative">
+          <select
+            value={sort}
+            onChange={(e) => onSortChange(e.target.value as SortOption)}
+            className="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
+          >
+            <option value="precio-asc">Menor precio</option>
+            <option value="precio-desc">Mayor precio</option>
+          </select>
+          <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
     </div>
   )

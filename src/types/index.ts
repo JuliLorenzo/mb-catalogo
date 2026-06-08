@@ -58,4 +58,4 @@ export interface OrderItem {
 
 export type SexoFilter = 'todos' | 'nene' | 'nena' | 'unisex' | 'bebe'
 export type EdadFilter = 'todos' | '0-2' | '3-5' | '6-8' | '9-12' | '12+'
-export type SortOption = 'az' | 'za' | 'precio-asc' | 'precio-desc'
+export type SortOption = 'precio-asc' | 'precio-desc'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Producto } from '../../types'
 
 interface ProductDetailProps {
@@ -48,11 +48,28 @@ export function ProductDetail({
 }: ProductDetailProps) {
   const [photoIndex, setPhotoIndex] = useState(0)
   const [localQty, setLocalQty] = useState(1)
+  const [inputVal, setInputVal] = useState('1')
+  const skipSyncRef = useRef(false)
 
   useEffect(() => {
     setPhotoIndex(0)
-    setLocalQty(currentQuantity > 0 ? currentQuantity : 1)
+    const q = currentQuantity > 0 ? currentQuantity : 1
+    setLocalQty(q)
+    setInputVal(String(q))
   }, [producto, currentQuantity])
+
+  useEffect(() => {
+    if (skipSyncRef.current) { skipSyncRef.current = false; return }
+    setInputVal(String(localQty))
+  }, [localQty])
+
+  function commitInput(raw: string) {
+    const parsed = parseInt(raw, 10)
+    const next = isNaN(parsed) || parsed < 1 ? 1 : parsed
+    skipSyncRef.current = true
+    setLocalQty(next)
+    setInputVal(String(next))
+  }
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
@@ -176,7 +193,16 @@ export function ProductDetail({
                 >
                   −
                 </button>
-                <span className="w-8 text-center font-semibold text-text">{localQty}</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={inputVal}
+                  onChange={(e) => setInputVal(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={(e) => commitInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
+                  className="w-10 text-center font-semibold text-text bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
                 <button
                   onClick={() => setLocalQty((q) => q + 1)}
                   className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-100 font-bold transition-colors"
@@ -190,7 +216,7 @@ export function ProductDetail({
               onClick={handleConfirm}
               className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all active:scale-[0.98] shadow-md"
             >
-              {alreadyInOrder ? 'Actualizar en mi pedido' : 'Agregar a mi pedido 🎁'}
+              {alreadyInOrder ? 'Actualizar en mi pedido' : 'Agregar a mi pedido'}
             </button>
           </div>
         </div>
