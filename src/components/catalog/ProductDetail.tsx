@@ -79,12 +79,17 @@ export function ProductDetail({
   )
 
   useEffect(() => {
+    if (!producto) return
+    const totalFotos = producto.fotos?.length ?? 0
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { onClose(); return }
+      if (document.activeElement?.tagName === 'INPUT') return
+      if (e.key === 'ArrowLeft') setPhotoIndex(i => Math.max(0, i - 1))
+      if (e.key === 'ArrowRight') setPhotoIndex(i => Math.min(totalFotos - 1, i + 1))
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [producto, onClose])
 
   if (!producto) return null
 
@@ -100,6 +105,9 @@ export function ProductDetail({
     }
     onClose()
   }
+
+  function prevPhoto() { setPhotoIndex(i => Math.max(0, i - 1)) }
+  function nextPhoto() { setPhotoIndex(i => Math.min(fotos.length - 1, i + 1)) }
 
   return (
     <div
@@ -124,12 +132,44 @@ export function ProductDetail({
           {/* Photo gallery */}
           {fotos.length > 0 ? (
             <div className="space-y-2">
-              <div className="aspect-video rounded-xl overflow-hidden bg-slate-50">
+              <div className="relative aspect-square rounded-xl overflow-hidden bg-slate-50">
                 <img
                   src={fotos[photoIndex]}
                   alt={producto.nombre}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
+                {fotos.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevPhoto}
+                      disabled={photoIndex === 0}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 disabled:opacity-20 text-white rounded-full flex items-center justify-center transition-all"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={nextPhoto}
+                      disabled={photoIndex === fotos.length - 1}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-black/40 hover:bg-black/60 disabled:opacity-20 text-white rounded-full flex items-center justify-center transition-all"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    {/* Dots */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {fotos.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setPhotoIndex(i)}
+                          className={`w-2 h-2 rounded-full transition-all ${i === photoIndex ? 'bg-white scale-125' : 'bg-white/50'}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               {fotos.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide">
@@ -148,7 +188,7 @@ export function ProductDetail({
               )}
             </div>
           ) : (
-            <div className="aspect-video rounded-xl bg-slate-50 flex items-center justify-center text-6xl">
+            <div className="aspect-square rounded-xl bg-slate-50 flex items-center justify-center text-6xl">
               🎁
             </div>
           )}

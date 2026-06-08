@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Producto } from '../../types'
 
 interface ProductCardProps {
@@ -39,13 +39,18 @@ function formatPrice(price: number): string {
 }
 
 export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd, onUpdateQuantity }: ProductCardProps) {
-  const foto = producto.fotos?.[0] ?? null
-  const ageLabel = formatAge(producto.edad_min, producto.edad_max)
+  const fotos = producto.fotos ?? []
+  const [photoIndex, setPhotoIndex] = useState(0)
   const [inputVal, setInputVal] = useState(String(cantidad))
+  const ageLabel = formatAge(producto.edad_min, producto.edad_max)
 
   useEffect(() => {
     setInputVal(String(cantidad))
   }, [cantidad])
+
+  useEffect(() => {
+    setPhotoIndex(0)
+  }, [producto.id])
 
   function commitInput(raw: string) {
     const parsed = parseInt(raw, 10)
@@ -53,56 +58,98 @@ export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd
     onUpdateQuantity(producto.id, next)
   }
 
+  function prevPhoto(e: React.MouseEvent) {
+    e.stopPropagation()
+    setPhotoIndex(i => Math.max(0, i - 1))
+  }
+
+  function nextPhoto(e: React.MouseEvent) {
+    e.stopPropagation()
+    setPhotoIndex(i => Math.min(fotos.length - 1, i + 1))
+  }
+
   return (
     <div className="group relative bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all duration-200 flex flex-col">
-      {/* Foto + info — clickeable para abrir detalle */}
-      <button
+
+      {/* Imagen — click abre detalle, flechas navegan */}
+      <div
+        className="relative aspect-square overflow-hidden bg-slate-50 cursor-pointer"
         onClick={onClick}
-        className="text-left w-full flex-1 active:scale-[0.98] transition-transform"
       >
-        {/* Foto */}
-        <div className="relative aspect-square overflow-hidden bg-slate-50">
-          {foto ? (
-            <img
-              src={foto}
-              alt={producto.nombre}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl">🎁</div>
-          )}
+        {fotos.length > 0 ? (
+          <img
+            src={fotos[photoIndex]}
+            alt={producto.nombre}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl">🎁</div>
+        )}
 
-          {/* Badge cantidad */}
-          {cantidad > 0 && (
-            <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow">
-              {cantidad}
-            </div>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="p-3 pb-2">
-          <h3 className="font-semibold text-text text-sm leading-tight mb-2 line-clamp-2">
-            {producto.nombre}
-          </h3>
-
-          <div className="flex flex-wrap gap-1 mb-2">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${SEXO_COLORS[producto.sexo]}`}>
-              {SEXO_LABELS[producto.sexo]}
-            </span>
-            {ageLabel && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600">
-                {ageLabel}
-              </span>
-            )}
+        {/* Badge cantidad */}
+        {cantidad > 0 && (
+          <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow z-10">
+            {cantidad}
           </div>
+        )}
 
-          {mostrarPrecios && (
-            <p className="font-bold text-primary text-base text-center">{formatPrice(producto.precio)}</p>
+        {/* Flechas carrusel */}
+        {fotos.length > 1 && (
+          <>
+            <button
+              onClick={prevPhoto}
+              disabled={photoIndex === 0}
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 hover:bg-black/60 disabled:opacity-0 text-white rounded-full flex items-center justify-center transition-all z-10 opacity-0 group-hover:opacity-100"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={nextPhoto}
+              disabled={photoIndex === fotos.length - 1}
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 bg-black/40 hover:bg-black/60 disabled:opacity-0 text-white rounded-full flex items-center justify-center transition-all z-10 opacity-0 group-hover:opacity-100"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            {/* Dots */}
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+              {fotos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); setPhotoIndex(i) }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIndex ? 'bg-white scale-125' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Info — click abre detalle */}
+      <div className="p-3 pb-2 cursor-pointer flex-1" onClick={onClick}>
+        <h3 className="font-semibold text-text text-sm leading-tight mb-2 line-clamp-2">
+          {producto.nombre}
+        </h3>
+
+        <div className="flex flex-wrap gap-1 mb-2">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${SEXO_COLORS[producto.sexo]}`}>
+            {SEXO_LABELS[producto.sexo]}
+          </span>
+          {ageLabel && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600">
+              {ageLabel}
+            </span>
           )}
         </div>
-      </button>
+
+        {mostrarPrecios && (
+          <p className="font-bold text-primary text-base text-center">{formatPrice(producto.precio)}</p>
+        )}
+      </div>
 
       {/* Acción */}
       <div className="px-3 pb-3">

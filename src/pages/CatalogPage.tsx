@@ -16,6 +16,7 @@ import { Producto, SexoFilter, EdadFilter, SortOption } from '../types'
 
 type View = 'catalog' | 'summary'
 
+
 function matchesEdad(producto: Producto, filter: EdadFilter): boolean {
   if (filter === 'todos') return true
   const ranges: Record<string, [number, number]> = {
@@ -54,7 +55,9 @@ export function CatalogPage() {
     }
 
     if (sexoFilter !== 'todos') {
-      result = result.filter((p) => p.sexo === sexoFilter)
+      result = result.filter((p) =>
+        p.sexo === sexoFilter || (sexoFilter !== 'bebe' && p.sexo === 'unisex')
+      )
     }
 
     result = result.filter((p) => matchesEdad(p, edadFilter))
