@@ -7,7 +7,8 @@ interface SendOrderEmailParams {
   pedidoId: string
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price: number | null): string {
+  if (price === null) return 'Consultar precio'
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -28,7 +29,7 @@ function formatDate(): string {
 
 function buildEmailHtml(params: SendOrderEmailParams): string {
   const { empresa, items, observaciones } = params
-  const total = items.reduce((sum, i) => sum + i.producto.precio * i.cantidad, 0)
+  const total = items.reduce((sum, i) => sum + (i.producto.precio ?? 0) * i.cantidad, 0)
   const fecha = formatDate()
 
   const rows = items
@@ -38,7 +39,7 @@ function buildEmailHtml(params: SendOrderEmailParams): string {
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${item.producto.nombre}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.cantidad}</td>
         <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${formatPrice(item.producto.precio)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${formatPrice(item.producto.precio * item.cantidad)}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${item.producto.precio !== null ? formatPrice(item.producto.precio * item.cantidad) : 'Consultar precio'}</td>
       </tr>
     `
     )

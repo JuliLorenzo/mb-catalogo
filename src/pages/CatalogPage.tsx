@@ -63,7 +63,9 @@ export function CatalogPage() {
     result = result.filter((p) => matchesEdad(p, edadFilter))
 
     result.sort((a, b) =>
-      sortOption === 'precio-asc' ? a.precio - b.precio : b.precio - a.precio
+      sortOption === 'precio-asc'
+        ? (a.precio ?? 0) - (b.precio ?? 0)
+        : (b.precio ?? 0) - (a.precio ?? 0)
     )
 
     return result
