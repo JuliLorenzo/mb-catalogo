@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCatalog } from '../hooks/useCatalog'
 import { useProducts } from '../hooks/useProducts'
@@ -9,12 +9,17 @@ import { SearchBar } from '../components/catalog/SearchBar'
 import { FilterBar } from '../components/catalog/FilterBar'
 import { ProductGrid } from '../components/catalog/ProductGrid'
 import { ProductDetail } from '../components/catalog/ProductDetail'
+import { CatalogLogin } from '../components/catalog/CatalogLogin'
 import { OrderPanel } from '../components/order/OrderPanel'
 import { OrderSummary } from '../components/order/OrderSummary'
 import { NotFoundPage } from './NotFoundPage'
 import { Producto, SexoFilter, EdadFilter, SortOption } from '../types'
 
-type View = 'catalog' | 'summary'
+type View = 'login' | 'catalog' | 'summary'
+
+function sessionKey(token: string) {
+  return `mb_catalog_${token}`
+}
 
 
 function matchesEdad(producto: Producto, filter: EdadFilter): boolean {
@@ -44,7 +49,28 @@ export function CatalogPage() {
   const [sortOption, setSortOption] = useState<SortOption>('precio-asc')
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [orderPanelOpen, setOrderPanelOpen] = useState(false)
-  const [view, setView] = useState<View>('catalog')
+  const [view, setView] = useState<View>('login')
+  const [loginError, setLoginError] = useState<string | null>(null)
+
+  // Restore session or skip login when password is null
+  useEffect(() => {
+    if (!empresa || !token) return
+    if (empresa.password_catalogo === null) { setView('catalog'); return }
+    if (sessionStorage.getItem(sessionKey(token))) setView('catalog')
+  }, [empresa, token])
+
+  function handleLogin(email: string, password: string) {
+    if (!empresa || !token) return
+    const emailOk = empresa.email_contacto?.toLowerCase() === email.toLowerCase()
+    const passOk = empresa.password_catalogo === password
+    if (emailOk && passOk) {
+      sessionStorage.setItem(sessionKey(token), '1')
+      setLoginError(null)
+      setView('catalog')
+    } else {
+      setLoginError('Email o contraseña incorrectos. Verificá los datos.')
+    }
+  }
 
   const filteredProducts = useMemo(() => {
     let result = [...productos]
@@ -74,6 +100,17 @@ export function CatalogPage() {
   const isLoading = catalogLoading || productsLoading
 
   if (notFound) return <NotFoundPage />
+
+  if (view === 'login' && empresa && empresa.password_catalogo !== null) {
+    return (
+      <CatalogLogin
+        empresaNombre={empresa.nombre}
+        isLoading={false}
+        errorMessage={loginError}
+        onLogin={handleLogin}
+      />
+    )
+  }
 
   if (isError) {
     return (
