@@ -60,7 +60,7 @@ export function EmployeeCatalogPage() {
     if (!empleado) return
     if (order.totalItems === empleado.cantidad_hijos && order.totalItems > 0 && !autoOpenedRef.current) {
       autoOpenedRef.current = true
-      setOrderPanelOpen(true)
+      setTimeout(() => setOrderPanelOpen(true), 2000)
     }
     if (order.totalItems < empleado.cantidad_hijos) {
       autoOpenedRef.current = false
