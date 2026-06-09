@@ -30,7 +30,8 @@ function formatAge(min: number | null, max: number | null): string {
   return `${min}–${max} años`
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price: number | null): string {
+  if (price === null) return ''
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -147,7 +148,9 @@ export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd
         </div>
 
         {mostrarPrecios && (
-          <p className="font-bold text-primary text-base text-center">{formatPrice(producto.precio)}</p>
+          producto.precio !== null
+            ? <p className="font-bold text-primary text-base text-center">{formatPrice(producto.precio)}</p>
+            : <p className="text-sm text-slate-400 font-medium text-center">Consultar precio</p>
         )}
       </div>
 

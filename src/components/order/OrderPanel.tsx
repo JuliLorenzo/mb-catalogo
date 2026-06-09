@@ -117,7 +117,10 @@ export function OrderPanel({
             {mostrarPrecios && (
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 font-medium">Total</span>
-                <span className="text-xl font-bold text-primary">{formatPrice(totalPrice)}</span>
+                {items.every(i => i.producto.precio === null)
+                  ? <span className="text-sm text-slate-400 font-medium">Consultar precio</span>
+                  : <span className="text-xl font-bold text-primary">{formatPrice(totalPrice)}</span>
+                }
               </div>
             )}
             <button

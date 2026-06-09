@@ -15,6 +15,7 @@ function formatPrice(price: number): string {
   }).format(price)
 }
 
+
 export function OrderItem({ item, mostrarPrecios, onUpdateQuantity, onRemove }: OrderItemProps) {
   const foto = item.producto.fotos?.[0] ?? null
 
@@ -53,9 +54,11 @@ export function OrderItem({ item, mostrarPrecios, onUpdateQuantity, onRemove }: 
           </div>
 
           {mostrarPrecios && (
-            <span className="text-sm font-bold text-primary ml-auto">
-              {formatPrice(item.producto.precio * item.cantidad)}
-            </span>
+            item.producto.precio !== null
+              ? <span className="text-sm font-bold text-primary ml-auto">
+                  {formatPrice(item.producto.precio * item.cantidad)}
+                </span>
+              : <span className="text-xs text-slate-400 font-medium ml-auto">Consultar precio</span>
           )}
         </div>
       </div>

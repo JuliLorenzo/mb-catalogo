@@ -42,7 +42,7 @@ export function useOrder() {
   )
 
   const totalItems = items.reduce((sum, i) => sum + i.cantidad, 0)
-  const totalPrice = items.reduce((sum, i) => sum + i.producto.precio * i.cantidad, 0)
+  const totalPrice = items.reduce((sum, i) => sum + (i.producto.precio ?? 0) * i.cantidad, 0)
 
   return {
     items,

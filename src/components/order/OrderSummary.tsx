@@ -32,7 +32,8 @@ export function OrderSummary({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const total = items.reduce((sum, i) => sum + i.producto.precio * i.cantidad, 0)
+  const total = items.reduce((sum, i) => sum + (i.producto.precio ?? 0) * i.cantidad, 0)
+  const allPricesNull = items.every(i => i.producto.precio === null)
   const totalItems = items.reduce((sum, i) => sum + i.cantidad, 0)
 
   async function handleSubmit() {
@@ -121,9 +122,11 @@ export function OrderSummary({
                     <p className="text-slate-400 text-xs mt-0.5">Cantidad: {item.cantidad}</p>
                   </div>
                   {mostrarPrecios && (
-                    <p className="font-semibold text-primary text-sm flex-shrink-0">
-                      {formatPrice(item.producto.precio * item.cantidad)}
-                    </p>
+                    item.producto.precio !== null
+                      ? <p className="font-semibold text-primary text-sm flex-shrink-0">
+                          {formatPrice(item.producto.precio * item.cantidad)}
+                        </p>
+                      : <p className="text-xs text-slate-400 font-medium flex-shrink-0">Consultar precio</p>
                   )}
                 </div>
               )
@@ -134,7 +137,10 @@ export function OrderSummary({
           {mostrarPrecios && (
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
               <span className="font-semibold text-text">Total del pedido</span>
-              <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
+              {allPricesNull
+                ? <span className="text-sm text-slate-400 font-medium">Consultar precio</span>
+                : <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
+              }
             </div>
           )}
 

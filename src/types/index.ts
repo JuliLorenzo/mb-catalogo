@@ -2,7 +2,7 @@ export interface Producto {
   id: string
   nombre: string
   descripcion: string | null
-  precio: number
+  precio: number | null
   fotos: string[] | null
   edad_min: number | null
   edad_max: number | null
