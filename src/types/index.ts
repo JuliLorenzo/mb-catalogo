@@ -18,6 +18,16 @@ export interface Empresa {
   email_contacto: string | null
   mostrar_precios: boolean
   token_acceso: string
+  password_catalogo: string | null
+  created_at: string
+}
+
+export interface Empleado {
+  id: string
+  empresa_id: string
+  nombre_apellido: string
+  cantidad_hijos: number
+  pedido_realizado: boolean
   created_at: string
 }
 

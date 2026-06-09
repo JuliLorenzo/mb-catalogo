@@ -5,6 +5,7 @@ interface ProductGridProps {
   productos: Producto[]
   mostrarPrecios: boolean
   getItemQuantity: (id: string) => number
+  remainingQuota?: number
   onProductClick: (producto: Producto) => void
   onAdd: (producto: Producto) => void
   onUpdateQuantity: (productoId: string, cantidad: number) => void
@@ -28,6 +29,7 @@ export function ProductGrid({
   productos,
   mostrarPrecios,
   getItemQuantity,
+  remainingQuota,
   onProductClick,
   onAdd,
   onUpdateQuantity,
@@ -63,6 +65,7 @@ export function ProductGrid({
           producto={producto}
           mostrarPrecios={mostrarPrecios}
           cantidad={getItemQuantity(producto.id)}
+          remainingQuota={remainingQuota}
           onClick={() => onProductClick(producto)}
           onAdd={onAdd}
           onUpdateQuantity={onUpdateQuantity}

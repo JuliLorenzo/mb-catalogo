@@ -1,4 +1,4 @@
-import { OrderItem, Empresa } from '../types'
+import { OrderItem, Empresa, Empleado } from '../types'
 
 interface SendOrderEmailParams {
   empresa: Empresa
@@ -94,6 +94,101 @@ function buildEmailHtml(params: SendOrderEmailParams): string {
     </body>
     </html>
   `
+}
+
+interface SendEmployeeOrderEmailParams {
+  empresa: Empresa
+  empleado: Empleado
+  items: OrderItem[]
+  observaciones: string
+  pedidoId: string
+}
+
+function buildEmployeeEmailHtml(params: SendEmployeeOrderEmailParams): string {
+  const { empresa, empleado, items, observaciones } = params
+  const fecha = formatDate()
+
+  const rows = items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${item.producto.nombre}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.cantidad}</td>
+      </tr>
+    `
+    )
+    .join('')
+
+  return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head><meta charset="UTF-8"/></head>
+    <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f8fafc;margin:0;padding:24px;">
+      <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <div style="background:#ff6eb5;padding:24px 32px;">
+          <h1 style="color:#fff;margin:0;font-size:22px;">🎁 Nuevo Pedido Empleado — Mundo Barrilete</h1>
+        </div>
+        <div style="padding:32px;">
+          <p style="color:#1a1a2e;margin:0 0 4px;"><strong>Empresa:</strong> ${empresa.nombre}</p>
+          <p style="color:#1a1a2e;margin:0 0 16px;"><strong>Empleado:</strong> ${empleado.nombre_apellido}</p>
+          <p style="color:#64748b;margin:0 0 24px;font-size:14px;">Fecha: ${fecha}</p>
+
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+            <thead>
+              <tr style="background:#f1f5f9;">
+                <th style="padding:10px 12px;text-align:left;font-size:13px;color:#64748b;font-weight:600;">Producto</th>
+                <th style="padding:10px 12px;text-align:center;font-size:13px;color:#64748b;font-weight:600;">Cant.</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+
+          ${
+            observaciones
+              ? `<div style="background:#f8fafc;border-left:4px solid #ff6eb5;padding:16px;border-radius:4px;margin-bottom:24px;">
+              <p style="margin:0;font-weight:600;color:#1a1a2e;">Observaciones:</p>
+              <p style="margin:8px 0 0;color:#475569;">${observaciones}</p>
+            </div>`
+              : ''
+          }
+
+          <p style="color:#94a3b8;font-size:12px;margin:0;">
+            Este email fue generado automáticamente por el catálogo digital de Mundo Barrilete.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
+export async function sendEmployeeOrderEmail(params: SendEmployeeOrderEmailParams): Promise<void> {
+  const { empresa, empleado } = params
+  const fecha = new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date())
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: 'julilorenzo4467@gmail.com',
+      subject: `Nuevo pedido — ${empresa.nombre} — ${empleado.nombre_apellido} — ${fecha}`,
+      html: buildEmployeeEmailHtml(params),
+    }),
+  })
+
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error ?? `Error ${response.status}`)
 }
 
 export async function sendOrderEmail(params: SendOrderEmailParams): Promise<void> {

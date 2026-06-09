@@ -5,6 +5,7 @@ interface ProductCardProps {
   producto: Producto
   mostrarPrecios: boolean
   cantidad: number
+  remainingQuota?: number  // undefined = sin límite (Fase 1)
   onClick: () => void
   onAdd: (producto: Producto) => void
   onUpdateQuantity: (productoId: string, cantidad: number) => void
@@ -39,11 +40,16 @@ function formatPrice(price: number | null): string {
   }).format(price)
 }
 
-export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd, onUpdateQuantity }: ProductCardProps) {
+export function ProductCard({ producto, mostrarPrecios, cantidad, remainingQuota, onClick, onAdd, onUpdateQuantity }: ProductCardProps) {
   const fotos = producto.fotos ?? []
   const [photoIndex, setPhotoIndex] = useState(0)
   const [inputVal, setInputVal] = useState(String(cantidad))
   const ageLabel = formatAge(producto.edad_min, producto.edad_max)
+
+  // Quota logic: undefined = no limit (Fase 1)
+  const maxQuantity = remainingQuota !== undefined ? cantidad + remainingQuota : undefined
+  const addDisabled = maxQuantity !== undefined && maxQuantity <= 0
+  const plusDisabled = maxQuantity !== undefined && cantidad >= maxQuantity
 
   useEffect(() => {
     setInputVal(String(cantidad))
@@ -55,7 +61,8 @@ export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd
 
   function commitInput(raw: string) {
     const parsed = parseInt(raw, 10)
-    const next = isNaN(parsed) || parsed < 0 ? 0 : parsed
+    let next = isNaN(parsed) || parsed < 0 ? 0 : parsed
+    if (maxQuantity !== undefined) next = Math.min(next, maxQuantity)
     onUpdateQuantity(producto.id, next)
   }
 
@@ -159,7 +166,8 @@ export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd
         {cantidad === 0 ? (
           <button
             onClick={() => onAdd(producto)}
-            className="w-full bg-primary/10 hover:bg-primary text-primary hover:text-white text-sm font-semibold py-1.5 rounded-xl transition-all border border-primary/20 hover:border-primary"
+            disabled={addDisabled}
+            className="w-full bg-primary/10 hover:bg-primary text-primary hover:text-white text-sm font-semibold py-1.5 rounded-xl transition-all border border-primary/20 hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-primary/10 disabled:hover:text-primary"
           >
             Agregar
           </button>
@@ -183,7 +191,8 @@ export function ProductCard({ producto, mostrarPrecios, cantidad, onClick, onAdd
             />
             <button
               onClick={() => onUpdateQuantity(producto.id, cantidad + 1)}
-              className="w-9 h-8 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all font-bold text-lg"
+              disabled={plusDisabled}
+              className="w-9 h-8 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-primary"
             >
               +
             </button>
