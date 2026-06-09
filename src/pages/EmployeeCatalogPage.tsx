@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCatalog } from '../hooks/useCatalog'
 import { useProducts } from '../hooks/useProducts'
@@ -47,12 +47,25 @@ export function EmployeeCatalogPage() {
   const [sortOption, setSortOption] = useState<SortOption>('precio-asc')
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [orderPanelOpen, setOrderPanelOpen] = useState(false)
+  const autoOpenedRef = useRef(false)
 
   // Auto-advance to catalog if already authenticated via sessionStorage
   const isAuthenticated = !!empleado
   const currentStep: PageStep = isAuthenticated ? (step === 'login' ? 'catalog' : step) : 'login'
 
   const remainingQuota = empleado ? empleado.cantidad_hijos - order.totalItems : undefined
+
+  // Auto-open order panel when quota is complete
+  useEffect(() => {
+    if (!empleado) return
+    if (order.totalItems === empleado.cantidad_hijos && order.totalItems > 0 && !autoOpenedRef.current) {
+      autoOpenedRef.current = true
+      setOrderPanelOpen(true)
+    }
+    if (order.totalItems < empleado.cantidad_hijos) {
+      autoOpenedRef.current = false
+    }
+  }, [order.totalItems, empleado])
 
   const filteredProducts = useMemo(() => {
     let result = [...productos]
@@ -163,15 +176,25 @@ export function EmployeeCatalogPage() {
 
         {/* Quota counter */}
         {empleado && (
-          <div className={`rounded-2xl px-5 py-3 flex items-center gap-3 ${
+          <div className={`rounded-2xl px-5 py-3 flex items-center gap-3 border ${
             quotaComplete
-              ? 'bg-green-50 border border-green-200'
-              : 'bg-primary/5 border border-primary/20'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-white border-slate-200'
           }`}>
-            <span className="text-xl">{quotaComplete ? '✅' : '🎁'}</span>
-            <p className={`font-semibold text-sm ${quotaComplete ? 'text-green-700' : 'text-primary'}`}>
+            <span className="text-xl flex-shrink-0">{quotaComplete ? '✅' : '🎁'}</span>
+            <p className={`font-semibold text-sm ${quotaComplete ? 'text-green-700' : 'text-slate-700'}`}>
               {quotaBannerText()}
             </p>
+            {!quotaComplete && remainingQuota !== undefined && (
+              <div className="ml-auto flex gap-1">
+                {Array.from({ length: empleado.cantidad_hijos }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2.5 h-2.5 rounded-full ${i < order.totalItems ? 'bg-primary' : 'bg-slate-200'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

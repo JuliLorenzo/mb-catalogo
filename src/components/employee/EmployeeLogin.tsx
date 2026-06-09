@@ -25,12 +25,12 @@ export function EmployeeLogin({ empresaNombre, isLoading, errorMessage, onLogin 
           <img
             src="/logo.jpeg"
             alt="Mundo Barrilete"
-            className="h-24 w-24 object-contain mb-4"
+            className="h-36 w-36 object-contain mb-5"
           />
-          <h1 className="text-2xl font-bold text-center text-zinc-800" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          <h1 className="text-4xl text-center text-zinc-800" style={{ fontFamily: "'Oswald', sans-serif" }}>
             MUNDO BARRILETE
           </h1>
-          <p className="text-primary font-semibold text-sm tracking-wide mt-1">
+          <p className="text-primary font-semibold text-base tracking-wide mt-2">
             Día del Niño 2026
           </p>
         </div>
