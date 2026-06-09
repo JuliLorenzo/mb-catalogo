@@ -37,11 +37,11 @@ export function useEmployeeAuth(empresa: Empresa | null, token: string | undefin
     }
 
     const { data: emp, error } = await supabase
-      .from('empleados')
-      .select('*')
-      .eq('empresa_id', empresa.id)
-      .ilike('nombre_apellido', nombreApellido.trim())
-      .maybeSingle()
+      .rpc('buscar_empleado', {
+        p_empresa_id: empresa.id,
+        p_nombre: nombreApellido.trim(),
+      })
+      .maybeSingle() as { data: Empleado | null; error: unknown }
 
     if (error || !emp) {
       setAuthState({
